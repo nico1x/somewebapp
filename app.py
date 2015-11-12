@@ -71,68 +71,82 @@ def logout():
 def before_request():
     g.user = current_user
 
-def compute_net_income():
-    total_income = 0
-    total_expense = 0
-    total_allocation = 0
-    qry = db.session.query(Transaction, func.sum(Transaction.amount).label("total")).filter_by(user_id=g.user.id).group_by(Transaction.transaction_type)
-    for _res in qry.all():
-        if _res.Transaction.transaction_type == "Income":
-            total_income = _res.total
-        elif _res.Transaction.transaction_type == "Expense":
-            total_expense = _res.total
-        else:
-            total_allocation = _res.total
+def net_income():
+    return float("{0:.2f}".format(Calculation(Transaction,Category).net_income))
+def total_income():
+    return float("{0:.2f}".format(Calculation(Transaction,Category).total_income))
+def total_expense():
+    return float("{0:.2f}".format(Calculation(Transaction,Category).total_expense))
+def total_allocation():
+    return float("{0:.2f}".format(Calculation(Transaction,Category).total_allocation))
 
-    return float("{0:.2f}".format(total_income - (total_expense+total_allocation)))
+class Calculation(object):
+
+    allocation_rs = None
+    allocated_expense_rs = None
+    unallocated_expense = None
+    expense_rs = None
+    net_income = None
+    net_allocation = None
+    total_income = None
+    total_expense = None
+    total_allocation = None
+
+    def __init__(self, Transaction, Category):
+
+        self.expense_rs = Transaction.query.filter_by(transaction_type="Expense", user_id=g.user.id).join(Category).with_entities(Category.id, Category.description, func.sum(Transaction.amount).label('total_amount')).group_by(Category.id)
+
+        self.allocation_rs = Transaction.query.filter_by(transaction_type="Allocation", user_id=g.user.id).join(Category).with_entities(Category.id, Category.description, func.sum(Transaction.amount).label('total_amount')).group_by(Category.id)
+
+        explist = []
+        for a in self.allocation_rs.all():
+            explist.append(a.id)
+
+        gross_unallocated = []
+        gross_expense = []
+        for e in self.expense_rs:
+            gross_expense.append(e.total_amount)
+            if not e.id in explist:
+                gross_unallocated.append(e.total_amount)
+
+        self.unallocated_expense = sum(gross_unallocated)
+        self.total_expense = sum(gross_expense)
+
+        # print explist
+        self.allocated_expense_rs = Transaction.query.filter_by(transaction_type="Expense", user_id=g.user.id).join(Category).with_entities(Category.id, Category.description, func.sum(Transaction.amount).label('total_amount')).filter(Category.id.in_(explist)).group_by(Category.id)
+
+        gross_allocation = []
+        self.net_allocation = []
+        for e in self.allocated_expense_rs.all():
+            d = {}
+            for a in self.allocation_rs.all():
+                if a.id == e.id:
+                    d["id"] = e.id
+                    d["description"] = e.description
+                    d["total_amount"] = a.total_amount - e.total_amount
+                    gross_allocation.append(a.total_amount)
+            self.net_allocation.append(d)
+
+        income_rs = Transaction.query.filter_by(transaction_type="Income", user_id=g.user.id).join(Category).with_entities(Category.id, Category.description, func.sum(Transaction.amount).label('total_amount')).group_by(Transaction.transaction_type).first()
+
+        self.total_income = income_rs.total_amount
+        sum_gross_allocation = sum(gross_allocation)
+        self.total_allocation = sum_gross_allocation
+
+        self.net_income = income_rs.total_amount - (sum_gross_allocation + self.unallocated_expense)
+
+@app.route("/test")
+@login_required
+def test():
+    calc = Calculation(Transaction, Category)
+    return render_template("test.html", allocation_rs=calc.allocation_rs.all(), expense_rs=calc.expense_rs.all(), net_allocation=calc.net_allocation, net_income=calc.net_income)
 
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
     loc = "nav-home"
     user = g.user.firstname
-
-    total_income = 0
-    total_expense = 0
-    total_allocation = 0
-    qry = db.session.query(Transaction, func.sum(Transaction.amount).label("total")).filter_by(user_id=g.user.id).group_by(Transaction.transaction_type)
-    for _res in qry.all():
-        if _res.Transaction.transaction_type == "Income":
-            total_income = float("{0:.2f}".format(_res.total))
-        elif _res.Transaction.transaction_type == "Expense":
-            total_expense = float("{0:.2f}".format(_res.total))
-        else:
-            total_allocation = float("{0:.2f}".format(_res.total))
-
-    net_income = total_income - (total_expense+total_allocation)
-    net_income = float("{0:.2f}".format(net_income))
-
-    # print "income: %r | expense: %r | allocation: %r | net: %r" % (total_income, total_expense, total_allocation, net_income)
-
-#avilable allocation = allocated - expense for each category
-
-    # print "allocations"
-    # #allocated
-    # qry = db.session.query(Transaction, Category.description, Category.id, func.sum(Transaction.amount).label("total")).filter_by(user_id=g.user.id, transaction_type="Allocation").join(Category).group_by(Category.id)
-    # for _res in qry.all():
-    #     print _res
-
-
-    # print "expense that has allocation"
-    # #allocated
-    # qry = db.session.query(Transaction.category_id, Category.description, func.sum(Transaction.amount).label("total")).filter_by(user_id=g.user.id, transaction_type="Expense").join(Category).group_by(Category.description)
-    # for _res in qry.all():
-    #     print _res
-
-    # qry2 = db.session.query(Transaction, Category.id).filter_by(user_id=g.user.id, transaction_type="Allocation").join(Category).group_by(Category.id)
-
-    # qry = db.session.query(Transaction, Category, func.sum(Transaction.amount).label("total_amount")).\
-    # filter_by(transaction_type="Expense").filter_by(user_id=g.user.id).join(Category).\
-    # filter(Category.id.in_(qry2)).group_by(Category.id)
-    # for _res in qry.all():
-    #     print _res
-
-    return render_template("index.html", user = user, total_income=total_income, total_expense=total_expense, total_allocation=total_allocation, net_income=net_income, locid = loc)
+    return render_template("index.html", user = user, total_income=total_income(), total_expense=total_expense(), total_allocation=total_allocation(), net_income=net_income(), locid = loc)
 #end index
 
 @app.route("/category", methods=["GET", "POST"])
@@ -236,7 +250,7 @@ def expense():
         return render_template("expense.html", success = success, locid = loc)
     elif request.method == "POST" and request.form["action"] == "add":
         #show add expense
-        return render_template("expense.html", action = "add", net_income = compute_net_income(), category = Category.query.filter_by(category_type="Expense"),  locid = loc)
+        return render_template("expense.html", action = "add", net_income = net_income(), category = Category.query.filter_by(category_type="Expense"),  locid = loc)
     else:
         #show expense list
         expense_total = 0
@@ -270,7 +284,7 @@ def allocation():
         return render_template("allocation.html", success = success, locid = loc)
     elif request.method == "POST" and request.form["action"] == "add":
         #show add allocation
-        return render_template("allocation.html", action = "add", net_income = compute_net_income(), category = Category.query.filter_by(category_type="Expense"),  locid = loc)
+        return render_template("allocation.html", action = "add", net_income = net_income(), category = Category.query.filter_by(category_type="Expense"),  locid = loc)
     else:
         #show allocation list
         allocation_total = 0

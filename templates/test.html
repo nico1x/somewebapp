@@ -1,0 +1,33 @@
+{% if expense_rs: %}
+<h1>Allocated Expenses</h1>
+    {% for r in expense_rs %}
+        {{ r.id }} | {{ r.description }} | {{ r.total_amount }}<br>
+    {% endfor %}
+{% else: %}
+    Empty Expense List
+{% endif %}
+
+{% if allocation_rs: %}
+<h1>Allocation</h1>
+    {% for r in allocation_rs %}
+        {{ r.id }} | {{ r.description }} | {{ r.total_amount }}<br>
+    {% endfor %}
+{% else: %}
+    Empty Allocation List
+{% endif %}
+
+{% if net_allocation: %}
+<h1>Net Allocation</h1>
+    {% for r in net_allocation %}
+        {{ r.id }} | {{ r.description }} | {{ r.total_amount }}<br>
+    {% endfor %}
+{% else: %}
+    Empty Expense List
+{% endif %}
+
+{% if net_income: %}
+<h1>Net Income</h1>
+    {{ net_income }}
+{% else: %}
+    Empty Expense List
+{% endif %}
