@@ -1,0 +1,176 @@
+{% extends "layout.html" %}
+{% block head %}
+    {{ super() }}
+
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/datatables.min.css') }}">
+    <script type=text/javascript src="{{ url_for('static', filename='js/datatables.min.js') }}"></script>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='font-awesome/css/font-awesome.min.css') }}">
+
+    <style type="text/css">
+        a.category-actions{
+            padding:4px;
+        }
+        #add-category{
+            padding: 10px;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#category-table').DataTable( {
+                "order": [[ 0, "asc" ]]
+            });
+        });
+
+        function postAction(categoryid, type){
+            if(type == "delete")
+                var result = confirm("Are you sure you want to delete?");
+            if(result || type != "delete"){
+                var form = document.createElement("form");
+                form.setAttribute("method", "POST");
+                form.setAttribute("action", "/category");
+                // form.setAttribute("target", "#");
+
+                var actionfield = document.createElement("input"); 
+                actionfield.setAttribute("type", "hidden");
+                actionfield.setAttribute("name", "action");
+                actionfield.setAttribute("value", type);
+                form.appendChild(actionfield);
+
+                var idfield = document.createElement("input"); 
+                idfield.setAttribute("type", "hidden");
+                idfield.setAttribute("name", "categoryid");
+                idfield.setAttribute("value", categoryid);
+                form.appendChild(idfield);
+
+                document.body.appendChild(form);
+
+                form.submit();
+                form.remove();
+            }
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% if action == "show": %}
+        <h1>Categories</h1>
+        <div id="show-category">
+            <table class="tbl" id="category-table">
+                <thead>
+                    <th width="10%">ID</th>
+                    <th width="60%">Description</th>
+                    <th width="20%">Type</th>
+                    <th width="10%">&nbsp;</th>
+                </thead>
+                <tbody>
+                    {% for c in category.all() %}
+                        <tr>
+                            <td>{{ c.id }}</td>
+                            <td>{{ c.description }}</td>
+                            <td>{{ c.category_type }}</td>
+                            <td><center>
+                                    <a class="category-actions" href="#" onclick="javascript:postAction({{ c.id }}, 'edit');" title="Edit" onclick=""><i class="fa fa-edit fa-lg"></i></a>
+                                    <a class="category-actions" href="#" onclick="javascript:postAction({{ c.id }}, 'delete');" title="Delete" onclick=""><i class="fa fa-trash-o fa-lg"></i></a>
+                                </center></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <form id="form-category" action="/category" method="POST" hidden>
+                <input type="text" name="action" value="add" hidden />
+            <input id="hidden-submit" type="submit" value="hidden-submit" hidden />
+            </form>
+            <div>
+                <div class="btn raised blue" onclick="document.getElementById('hidden-submit').click()" >
+                    <div class="center" fit>ADD CATEGORY</div>
+                </div>
+            </div>
+        </div>
+    {% elif action == "add": %}
+        <h1>Add Category</h1>
+        <div id="add-category">
+            <form id="form-category" action="/category" method="POST">
+                <table>
+                    <tr>
+                        <td>Description:</td>
+                        <td><input type="text" name="description" placeholder="Description" required /></td>
+                    </tr>
+                    <tr>
+                        <td>Income/Expense:</td>
+                        <td>
+                            <select name="categorytype" style="width:100%; text-indent:15px; line-height:28px;" required >
+                                <option value="" disabled selected >Select Type</option>
+                                <option value="Income">Income</option>
+                                <option value="Expense">Expense</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <input type="text" name="action" value="insert" hidden />
+            <input id="hidden-submit" type="submit" value="hidden-submit" hidden />
+            </form>
+            <div>
+                <div class="btn raised blue" onclick="document.getElementById('hidden-submit').click()" >
+                    <div class="center" fit>SUBMIT</div>
+                </div>
+                <div class="btn raised blue" onclick="document.location.href = '/category'" >
+                    <div class="center" fit>CANCEL</div>
+                </div>
+            </div>
+        </div>
+    {% elif action == "edit": %}
+        <h1>Edit Category</h1>
+        <div id="edit-category">
+            <form id="form-category" action="/category" method="POST">
+                <table>
+                    <tr>
+                        <td>Description:</td>
+                        <td><input type="text" name="description" placeholder="Description" value="{{ category.description }}" required /></td>
+                    </tr>
+                    <tr>
+                        <td>Income/Expense:</td>
+                        <td>
+                            <select name="categorytype" style="width:100%; text-indent:15px; line-height:28px;" required >
+                                <option value="" disabled >Select Type</option>
+                                <option value="Income" {{ "selected" if category.category_type == "Income" else "" }}>Income</option>
+                                <option value="Expense" {{ "selected" if category.category_type == "Expense" else "" }}>Expense</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <input type="text" name="action" value="fin-edit" hidden />
+            <input id="hidden-submit" type="submit" value="hidden-submit" hidden />
+            <input id="hidden-category" name="categoryid" type="text" value="{{ category.id }}" hidden />
+            </form>
+            <div>
+                <div class="btn raised blue" onclick="document.getElementById('hidden-submit').click()" >
+                    <div class="center" fit>SUBMIT</div>
+                </div>
+                <div class="btn raised blue" onclick="document.location.href = '/category'" >
+                    <div class="center" fit>CANCEL</div>
+                </div>
+            </div>
+        </div>
+    {% elif action == "edit-fin": %}
+        {% if success: %}
+            <h1>Edit success!</h1>
+        {% else %}
+            <h1>Edit failed!</h1>
+            <h2>Description already exists!</h2>
+        {% endif %}
+        <a href="/category" alt="return">Return</a>
+    {% elif action == "delete-fin": %}
+        <h1>Delete success!</h1>
+        <a href="/category" alt="return">Return</a>
+    {% else%}
+        {% if success: %}
+            <h1>Add success!</h1>
+        {% else %}
+            <h1>Add failed!</h1>
+            <h2>Description already exists!</h2>
+        {% endif %}
+        <a href="/category" alt="return">Return</a>
+    {% endif %}
+
+{% endblock %}

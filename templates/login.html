@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+    <head>
+    {% block head %}
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/selectric.css') }}">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/style.css') }}">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/buttons.css') }}">
+
+        <script type=text/javascript src="{{ url_for('static', filename='js/jquery-1.11.3.min.js') }}"></script>
+        <script type=text/javascript src="{{ url_for('static', filename='js/jquery.selectric.min.js') }}"></script>
+
+        <style type="text/css">
+            #login-content{
+                min-width: 360px;
+                max-width: 360px;
+                min-height: 330px;
+                max-height: 330px;
+                width: 50%;
+                height: 50%;
+                overflow: auto;
+                margin: auto;
+                position: absolute;
+                top: -250px; left: 0; bottom: 0; right: 0;
+                padding: 50px;
+
+                background:#ffffff;
+                -moz-border-radius:10px;
+                -webkit-border-radius:10px;
+                background-color: #f5f5f5;
+                border: 1px solid #e3e3e3;
+                -webkit-border-radius: 4px;
+                -moz-border-radius: 4px;
+                border-radius: 4px;
+                -webkit-box-shadow: inset 0 0.25px 0.25px rgba(0,0,0,0.05);
+                -moz-box-shadow: inset 0 0.25px 0.25px rgba(0,0,0,0.05);
+                box-shadow: inset 0 0.25px 0.25px rgba(0,0,0,0.05);
+                box-shadow: 0px 0px 100px rgba(0, 0, 0, 0.5), 0px 0.25px 0px rgba(255, 255, 255, 0.9) inset;
+
+            }
+            input{
+                height: 32px;
+                margin: 5px 0 5px 0;
+                width: 100%;
+            }
+            .message_flash{
+                color: #B70000;
+            }
+        </style>
+    {% endblock %}
+    </head>
+    <body>
+        <div id="login-content">
+            <h1>Login</h1>
+            <form method="POST" action="">
+                <input type="text" name="username" placeholder="username"><br>
+                <input type="password" name="password" placeholder="password"><br>
+                <input type="submit" id="hidden-submit" style="display:none;">
+                <div class="btn raised blue" onclick="document.getElementById('hidden-submit').click()" >
+                    <div class="center" fit>LOGIN</div>
+                </div>
+                <br/>
+                <a href="/register" alt="Register">Register</a>
+            </form>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                        {% for message in messages %}
+                            <span class="message_flash">{{ message }}</span>
+                        {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+    </body>
+</html>

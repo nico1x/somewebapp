@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+    <head>
+    {% block head %}
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/selectric.css') }}">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/style.css') }}">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/buttons.css') }}">
+
+        <script type=text/javascript src="{{ url_for('static', filename='js/jquery-1.11.3.min.js') }}"></script>
+        <script type=text/javascript src="{{ url_for('static', filename='js/jquery.selectric.min.js') }}"></script>
+
+        <title>
+            {% block title %}
+            {% endblock %}
+        </title>
+    {% endblock %}
+    </head>
+    <body>
+        <div id="main-content">
+            <div id="navigation-bar">
+                {% block navigation %}
+                    {% include "navigation.html" %}
+                {% endblock %}
+            </div>
+            <div id="content-col">
+                {% block content %}
+
+                {% endblock %}
+            </div>
+        </div>
+    <div id="footer">
+        {% block footer %}
+            <p class="footer"><span>&copy; Copyright 2015</span>|<a href="mailto:nico.pineda@infoshiftinc.com">Nico</a></p>
+        {% endblock %}
+    </div>
+    </body>
+</html>

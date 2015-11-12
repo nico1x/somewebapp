@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block head %}
+    {{ super() }}
+    <script type="text/javascript">
+        function postAction(loc){
+            var form = document.createElement("form");
+            form.setAttribute("method", "POST");
+            form.setAttribute("action", "/" + loc);
+
+            var actionfield = document.createElement("input"); 
+            actionfield.setAttribute("type", "hidden");
+            actionfield.setAttribute("name", "action");
+            actionfield.setAttribute("value", "add");
+            form.appendChild(actionfield);
+
+            document.body.appendChild(form);
+
+            form.submit();
+            form.remove();
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div id="div-index-content"><h1>Welcome {{ user }} !</h1></div>
+    <hr style="width:50%;">
+    <h2>Total Income: {{ total_income }}</h2>
+    <h2>Total Expense: {{ total_expense }}</h2>
+    <h2>Total Allocation: {{ total_allocation }}</h2>
+    <hr style="width:50%;">
+    <h1>NET INCOME: {{ net_income }}</h1>
+
+    <br>
+    <br>
+    <div>
+        <div class="btn raised blue" onclick="javascript:postAction('income');" >
+            <div class="center" fit>EARN</div>
+        </div>
+        <div class="btn raised blue" onclick="javascript:postAction('expense');" >
+            <div class="center" fit>SPEND</div>
+        </div>
+        <div class="btn raised blue" onclick="javascript:postAction('allocation');" >
+            <div class="center" fit>ALLOCATE</div>
+        </div>
+    </div>
+{% endblock %}

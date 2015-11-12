@@ -1,0 +1,192 @@
+{% extends "layout.html" %}
+{% block head %}
+    {{ super() }}
+
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/datatables.min.css') }}">
+    <script type=text/javascript src="{{ url_for('static', filename='js/datatables.min.js') }}"></script>
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='font-awesome/css/font-awesome.min.css') }}">
+
+    <style type="text/css">
+        a.income-actions{
+            padding:4px;
+        }
+        #add-income{
+            padding: 10px;
+        }
+        h1{
+            margin-bottom: 10px;
+        }
+        #income-percentage-table{
+            width: 50%;
+            border: 0px;
+            margin: 0px;
+        }
+        #income-percentage-table td{
+            padding: 10px 30px 10px 30px;
+        }
+        #income-percentage-table h2{
+            font-family: "ROBOTO-LIGHT";
+            color: #607D8B;
+        }
+        /*.highest{
+            font-size: 1.5em;
+        }*/
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#income-table').DataTable( {
+                "order": [[ 0, "asc" ]]
+            });
+
+            $('#income-percentage-table').DataTable( {
+                "order": [[ 1, "desc" ]],
+                "bPaginate": false,
+                "bFilter": false,
+                "bInfo": false
+            });
+
+            $(function() {
+
+                // Get all the elements with class id
+                var $td = $("#income-percentage-table .percent");
+                var max = 0;
+                $.each($td , function(){
+                    if( parseInt($(this).text()) > max){
+                        max = parseInt($(this).text())
+                    }
+                });
+
+                $.each($td , function(){
+                    if( parseInt($(this).text()) == max){
+                        // $(this).closest("tr").addClass("highest");
+                        $(this).closest("tr").css("background","#FDDBDB");
+                    }
+                });
+            });
+
+        });
+
+        // function postAction(incomeid, type){
+        //     if(type == "delete")
+        //         var result = confirm("Are you sure you want to delete?");
+        //     if(result || type != "delete"){
+        //         var form = document.createElement("form");
+        //         form.setAttribute("method", "POST");
+        //         form.setAttribute("action", "/income");
+        //         // form.setAttribute("target", "#");
+
+        //         var actionfield = document.createElement("input"); 
+        //         actionfield.setAttribute("type", "hidden");
+        //         actionfield.setAttribute("name", "action");
+        //         actionfield.setAttribute("value", type);
+        //         form.appendChild(actionfield);
+
+        //         var idfield = document.createElement("input"); 
+        //         idfield.setAttribute("type", "hidden");
+        //         idfield.setAttribute("name", "incomeid");
+        //         idfield.setAttribute("value", incomeid);
+        //         form.appendChild(idfield);
+
+        //         document.body.appendChild(form);
+
+        //         form.submit();
+        //         form.remove();
+        //     }
+        // }
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% if action == "show": %}
+        <h1>Percentage</h1>
+        <table class="tbl" id="income-percentage-table">
+            <thead>
+                <th width="50%">Description</th>
+                <th width="20%">Total</th>
+                <th width="30%">Percentage</th>
+            </thead>
+            <tbody>
+                {% for perc in percentage_list %}
+                    <tr>
+                        <td><h2>{{ perc.description }}<h2></td>
+                        <td><h2>{{ perc.amount }}<h2></td>
+                        <td class="percent"><h2><center>{{ perc.percent }}</center></h2></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <hr>
+        <h1>Incomes</h1>
+        <div id="show-income">
+            <table class="tbl" id="income-table">
+                <thead>
+                    <th width="10%">ID</th>
+                    <th width="25%">Date</th>
+                    <th width="35%">Amount</th>
+                    <th width="20%">Category</th>
+                </thead>
+                <tbody>
+                    {% for i in income.all() %}
+                        <tr>
+                            <td>{{ i.Transaction.id }}</td>
+                            <td>{{ i.Transaction.date.strftime("%Y-%m-%d") }}</td>
+                            <td>{{ i.Transaction.amount }}</td>
+                            <td>{{ i.Category.description }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <form id="form-income" action="/income" method="POST" hidden>
+                <input type="text" name="action" value="add" hidden />
+            <input id="hidden-submit" type="submit" value="hidden-submit" hidden />
+            </form>
+            <div>
+                <div class="btn raised blue" onclick="document.getElementById('hidden-submit').click()" >
+                    <div class="center" fit>ADD INCOME</div>
+                </div>
+            </div>
+        </div>
+    {% elif action == "add": %}
+        <h1>Add Income</h1>
+        <div id="add-income">
+            <form id="form-income" action="/income" method="POST">
+                <table>
+                    <tr>
+                        <td>Amount:</td>
+                        <td><input type="number" step="0.01" name="amount" placeholder="Amount" required /></td>
+                    </tr>
+                    <tr>
+                        <td>Category:</td>
+                        <td>
+                            <select name="categoryid" style="width:100%; text-indent:15px; line-height:28px;" required >
+                                <option value="" disabled selected >Select One...</option>
+                                {% for c in category.all() %}
+                                    <option value={{ c.id }}>{{ c.description }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <input type="text" name="action" value="insert" hidden />
+            <input id="hidden-submit" type="submit" value="hidden-submit" hidden />
+            </form>
+            <div>
+                <div class="btn raised blue" onclick="document.getElementById('hidden-submit').click()" >
+                    <div class="center" fit>SUBMIT</div>
+                </div>
+                <div class="btn raised blue" onclick="document.location.href = '/income'" >
+                    <div class="center" fit>CANCEL</div>
+                </div>
+            </div>
+        </div>
+    {% else%}
+        {% if success: %}
+            <h1>Add success!</h1>
+        {% else %}
+            <h1>Opps... Something happened, add failed!</h1>
+        {% endif %}
+        <a href="/income" alt="return">Return</a>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,160 @@
+@font-face {
+	font-family: ROBOTO-REGULAR;
+	src: url('../fonts/roboto/regular.ttf') ; 
+}
+
+@font-face {
+	font-family: ROBOTO-LIGHT;
+	src: url('../fonts/roboto/light.ttf') ; 
+}
+body {
+	font-family: "ROBOTO-REGULAR";
+	color: #212121;
+}
+h1 {
+	font-family: "ROBOTO-LIGHT";
+	color: #607D8B;
+	/*455A64*/
+}
+hr{
+    margin: 40px 0 40px 0;
+}
+a, span {
+    text-decoration: none !important;
+    padding: 8px;
+}
+a:visited, a:link, a:active {
+	color: #000;
+	/*607D8B*/
+}
+a:hover {
+	color: #3F51B5;
+}
+.btn{
+    margin: 10px;
+}
+#navigation-bar{
+    display: table;
+    position: fixed;
+    padding: 15px;
+    background-color: #bbb;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    margin: auto;
+    width: 100%;
+    box-shadow: 0px 1px 50px #5E5E5E;
+}
+a.nav{
+    padding: 15px;
+    font-size: 20px;
+}
+#footer{
+	display: table;
+	text-align: center;
+	position: fixed;
+	height: 40px;
+	background-color: #E3E3E4;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	margin: auto;
+	width: 100%;
+}
+p.footer{
+    vertical-align: middle;
+    display: table-cell;  
+}
+#content-col {
+    margin:50px auto;
+    width: 100%;
+    max-width:960px;
+    min-width: 360px;
+    min-height:500px;
+    padding:30px;
+    margin-top: 80px;
+    margin-bottom: 70px;
+    background:#ffffff;
+    -moz-border-radius:10px;
+    -webkit-border-radius:10px;
+    background-color: #f5f5f5;
+    border: 1px solid #e3e3e3;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 0.25px 0.25px rgba(0,0,0,0.05);
+    -moz-box-shadow: inset 0 0.25px 0.25px rgba(0,0,0,0.05);
+    box-shadow: inset 0 0.25px 0.25px rgba(0,0,0,0.05);
+    box-shadow: 0px 0px 100px rgba(0, 0, 0, 0.5), 0px 0.25px 0px rgba(255, 255, 255, 0.9) inset;
+}
+/*#main-content{
+    margin:50px auto;
+    width:960px;
+    min-width: 500px;
+}*/
+*{
+    margin:0;
+    padding:0;
+}
+html{
+    min-height:100%;
+}
+select {
+    background: #CFD8DC;
+    height: 100%;
+    height: 35px;
+}
+select option {
+    border:none;
+}
+input{
+    height: 100%;
+    padding: 8px;
+}
+td{
+    height: 35px;
+    padding: 5px;
+}
+input, select, textarea {
+    margin: 0 auto;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+}
+input:focus, select:focus, textarea:focus {
+    border-color: #a4baca !important;
+    background: #f5f7f9;
+}
+form {
+    padding: 20px;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+select:required:invalid {
+    color: gray;
+}
+option[value=""][disabled] {
+    display: none;
+}
+option {
+    color: black;
+}
+.tbl{
+    border-collapse:collapse;
+}
+.tbl th{
+    padding:5px;
+    background:#bbb;
+    color:#fff;
+    border:1px solid #aaa;
+}
+.dataTables_length, .dataTables_filter{
+    margin-bottom: 20px;
+}
+h1{
+    margin-bottom: 10px;
+}
+#netincome{
+    color: #49A508;
+    font-size: 1.5em;
+}
